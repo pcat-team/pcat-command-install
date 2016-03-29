@@ -1,0 +1,22 @@
+{
+  "name": "pcat-command-install",
+  "version": "1.0.0",
+  "description": "install module from pcnpm",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pcat-team/pcat-command-install.git"
+  },
+  "keywords": [
+    "pcnpm"
+  ],
+  "author": "guoxmin",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pcat-team/pcat-command-install/issues"
+  },
+  "homepage": "https://github.com/pcat-team/pcat-command-install#readme"
+}
