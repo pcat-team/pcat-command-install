@@ -22,28 +22,33 @@ function travel(dir, callback) {
             var basename = path.basename(pathname);
             var parentBasename = getParentBaseName(pathname);
 
+            // 安装后的模块
+            var moduleName = parentBasename+"/"+basename;
 
 
             if (parentBasename.indexOf("@pc") >= 0) {
 
-                var rSourceSrc = path.resolve(projectPath, pathname, "src");
+                var rSource = path.resolve(projectPath, pathname);
+                // var rSourceSrc = path.resolve(projectPath, pathname, "src");
                 var rSourcePackage = path.resolve(projectPath, pathname, "package.json");
 
 
-                if (!fis.util.exists(rSourceSrc)) {
-                    fis.log.warn("[%s]不符合模块规范，须有src源码目录", basename);
-                    return;
-                }
+
+                // if (!fis.util.exists(rSourceSrc)) {
+                //     fis.log.warn("[%s]不符合模块规范，须有src源码目录", moduleName);
+                //     return;
+                // }
 
 
-                if (!fis.util.exists(rSourcePackage)) {
-                    fis.log.warn("[%s]模块缺少package.json文件", basename);
-                    return;
-                }
+                // if (!fis.util.exists(rSourcePackage)) {
+                //     fis.log.warn("[%s]模块缺少package.json文件", moduleName);
+                //     return;
+                // }
+
 
 
                 var target = path.resolve(moduleDir, basename);
-                var targetSrc = path.resolve(moduleDir, basename, "src");
+                // var targetSrc = path.resolve(moduleDir, basename, "src");
                 var targetPackage = path.resolve(moduleDir, basename, "package.json");
 
                 // 准备安装的版本
@@ -57,10 +62,11 @@ function travel(dir, callback) {
 
                     fis.util.mkdir(target);
 
-                    fis.util.copy(rSourceSrc, targetSrc);
-                    fis.util.copy(rSourcePackage, targetPackage);
+                    fis.util.copy(rSource, target,["**"],[rSource+"/{node_modules,test}/**",rSource+"\.**"]);
+                    // fis.util.copy(rSourceSrc, targetSrc);
+                    // fis.util.copy(rSourcePackage, targetPackage);
 
-                    installed.push("pcnpm:" + parentBasename + "/" + basename + "@" + sourceVersion);
+                    installed.push("pcnpm:" +moduleName+ "@" + sourceVersion);
 
 
                 } else {
@@ -69,13 +75,13 @@ function travel(dir, callback) {
                     // console.log(sourceVersion)
                     // console.log(targetVersion)
                     
-                    installed.push("pcnpm:" + parentBasename + "/" + basename + "@" + targetVersion);
+                    installed.push("pcnpm:" +moduleName+ "@" + targetVersion);
 
                     var ret = compareVersion(sourceVersion, targetVersion);
 
                     // < || 》
                     if (ret != 2) {
-                        fis.log.warn("子系统当前使用的 [%s] 版本为 [%s]，如需安装 [%s] 版本，可通过 pcat install %s --force 强制安装，注意，这将影响整个子系统，慎重操作！！！", basename, targetVersion, sourceVersion, parentBasename + "/" + basename + "@" + sourceVersion)
+                        fis.log.warn("子系统当前使用的 [%s] 版本为 [%s]，如需安装 [%s] 版本，可通过 pcat install %s --force 强制安装，注意，修改会影响整个子系统，慎重操作！！！", moduleName, targetVersion, sourceVersion, moduleName+ "@" + sourceVersion)
                     } 
                 }
             }
@@ -155,14 +161,19 @@ exports.run = function(argv, cli) {
         });
 
         pcnpm.on('close', function(code) {
+            // 遍历node_modules 目录，将模块扁平化
             travel('./node_modules');
 
+            // 打印安装的模块列表
             if (installed.length) {
                 console.log("Installed list:")
                 installed.forEach(function(item) {
                     console.log("├─" + item)
                 })
             }
+
+            // 删除 node_modules 目录
+            fis.util.del(projectPath+"/node_modules");
 
         });
 

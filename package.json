@@ -1,6 +1,6 @@
 {
   "name": "pcat-command-install",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "install module from pcnpm",
   "main": "index.js",
   "scripts": {
